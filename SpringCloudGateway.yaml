@@ -1,0 +1,36 @@
+  Client
+    |
+    v
+    Spring Cloud Gateway
+    |
+    |-- Route Predicate: Path=/api/accounts/**
+    |
+    |-- Filters:
+    |     - RewritePath
+    |     - Add Headers
+    |     - CircuitBreaker
+    |
+    v
+    Account Service
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: account-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/accounts/**
+          filters:
+            - AddRequestHeader=X-Source-System, api-gateway
+            - AddResponseHeader=X-Gateway, spring-cloud-gateway\\\
+
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      paymentService:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
